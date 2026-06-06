@@ -1,16 +1,8 @@
-name: Deploy React Atlas to GitHub Pages
+name: Redirect Root Pages to Project Site
 
 on:
   push:
     branches: ["main"]
-  pull_request:
-    branches: ["main"]
-    paths:
-      - "web/**"
-      - "README.md"
-      - "agents/**"
-      - "crewai_mcp_course/**"
-      - ".github/workflows/jekyll-gh-pages.yml"
   workflow_dispatch:
 
 permissions:
@@ -29,29 +21,21 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
-      - name: Install website dependencies
-        run: npm install
-        working-directory: web
-
-      - name: Build React atlas
-        run: npm run build
-        working-directory: web
+      - name: Prepare redirect site
+        run: |
+          mkdir -p _site
+          cp index.html _site/index.html
+          touch _site/.nojekyll
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: web/dist
+          path: _site
 
   deploy:
-    if: github.event_name != 'pull_request'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
